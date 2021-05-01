@@ -1,0 +1,205 @@
+#include <iostream>
+using namespace std;
+
+struct node{
+    node *next;
+    int value;
+};
+
+struct list
+{
+    node* first;
+    node* last;
+    int size;
+    list(){
+        size=0;
+        first = nullptr;
+        last = nullptr;
+    }
+    void push_back(int new_element)
+    {
+        node *new_node = new node; //создаю указатель на структуру и выделяем память на новую структуру
+        new_node -> value = new_element;
+        new_node -> next = nullptr;
+        if(size != 0)
+        {
+            last -> next = new_node;
+            last = new_node;
+        }
+        else
+        {
+            last= new_node;
+            first= new_node;
+        }
+        size = size + 1;
+    }
+    void print_list()
+    {
+        node *temp = first;
+        for(int i=0; i<size; ++i)
+        {
+            cout<< temp -> value <<" ";
+            temp = temp -> next;            
+        }
+    } 
+    void push_front (int new_element)
+    {
+        node *new_node = new node;
+        new_node-> value = new_element;
+        new_node -> next = first;
+        if(size == 0)
+        {
+            first = new_node;
+            last = new_node;
+        }
+        else
+        {
+            first=new_node;
+        }
+        size ++;
+    }
+    void insert(int new_element, int num){
+        if(num==0){
+            push_front(new_element);
+        }
+        else if(num==size){
+            push_back(new_element);
+        }
+        else{
+            node* new_node = new node;
+            new_node -> value = new_element;
+            node *temp = first->next;
+            for(int i=1; i< size-1; ++i){
+                if(num== i+1){
+                    new_node->next = temp->next;
+                    temp->next = new_node;
+                }
+                temp = temp -> next;
+                
+                
+            }
+            size ++;
+        }
+    }
+};
+	//удаление по данному значению
+void remove_by_value(list* new_list, int val)
+{
+    if (new_list->size == 0)
+    {
+        return;
+    }
+	while (new_list->first->value == val)
+	{
+	    node* tmp = new_list->first;
+        new_list->first = new_list->first->next;
+        delete[] tmp;
+        if (new_list->size == 1)
+        {
+            new_list->last = nullptr;
+            new_list->size = 0;
+            break;
+        }
+        new_list->size -= 1;
+    }
+    if (new_list->size != 0)
+    {
+        node* temp = new_list->first;
+        while ((temp!=nullptr) and (temp->next != nullptr))
+        {
+            while (temp->next->value == val)
+            {
+                node* tmp = temp->next;
+                temp->next = tmp->next;
+                delete[] tmp;
+                if (temp->next == nullptr)
+                {
+                    new_list->last = temp;
+                    new_list->size -= 1;
+                    break;
+                }
+                new_list->size -= 1;
+            }
+            temp = temp->next;
+        }
+    }
+}
+
+//удаление элемента по индексу
+void del_i(list* new_list, int index)
+{
+    if ((index >= 0) and (index < new_list->size))
+    {
+        if (new_list->size == 1)
+        {
+            delete[] new_list->first;
+            new_list->first = nullptr;
+            new_list->last = nullptr;
+            new_list->size = 0;
+            return;
+        }
+        if (index == 0)
+        {
+            node* old_element = new_list->first;
+            new_list->first = old_element->next;
+            delete[] old_element;
+            new_list->size -= 1;
+            return;
+        }
+        node* temp = new_list->first;
+        for (int i = 0; i < index - 1; ++i)
+        {
+            temp = temp->next;
+        }
+        node* old_element = temp->next;
+        temp->next = old_element->next;
+        delete[] old_element;
+        new_list->size-=1;
+    }
+}
+
+void delete_all(list* new_list)
+{
+    while(new_list->size != 0)
+    {
+        del_i(new_list, 0);
+    }
+}
+void reverse(list** ptr)
+{
+    list* new_list = *ptr;
+    node* temp =new_list-> first;
+    list new_list2 = list();
+    while(temp!=nullptr)
+    {
+        new_list2.push_front(temp->value);
+        temp = temp->next; 
+    }
+    *ptr = &new_list2;
+    delete_all(new_list);
+}
+
+int main()
+{
+    list a = list();
+    for(int i=0; i<5; ++i)
+    {
+        int buff;
+        cin>>buff;
+        a.push_back(buff);
+    }
+    a.insert(6, 2);
+    a.print_list();
+    cout << "\n"; cout << a.size; cout << "\n";
+    list* b = &a;
+    reverse(&b);
+    a = *b;
+    a.print_list();
+    cout << "\n";
+    del_i(&a, 1);
+    a.print_list();
+    cout << "\n";
+    delete_all(&a);
+    a.push_back(96);
+    a.print_list();
+}
